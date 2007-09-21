@@ -1,0 +1,164 @@
+=======================================================
+= pylorcon
+= Python wrapper for the LORCON packet capture library
+= By: Tom Wambold <tom5760@gmail.com>
+=
+= LORCON URL: http://802.11ninja.net/lorcon/
+= pylorcon URL: http://code.google.com/p/pylorcon
+=======================================================
+
+Thanks for using this!  I'm sure there are problems, or ways to improve things,
+so please email all comments/questions/improvements/patches/etc to my email
+address tom5760@gmail.com.  I'd appreciate it greatly.  Also, great thanks go
+out to the Lorcon team for writing a wonderful library!  - Tom
+
+I.) INCLUDED FILES
+
+	1.) README - This file
+
+	2.) pylorcon.c - Main wrapper file
+
+	3.) setup.py - Python disutils builder and installer
+
+	4.) tx.py - Copy of the tx.c program from LORCON.  Sample app.
+
+II.) INSTALLATION
+	1.) PREREQUISITES
+
+		You must have the LORCON library installed already, you can get it at
+		the URL listed above.
+
+	2.) BUILDING
+
+		Simply type:
+			python setup.py build
+		This will compile pylorcon.
+
+	3.) INSTALLING
+
+		Also simple:
+			python setup.py install
+		You will probably need root access to do this.
+
+III.) NOTES
+	
+	Every function provided by LORCON is wrapped in Python, except the
+	following:
+	tx80211_freecardlist() - This is taken care of in the wrapping of the
+		getcardlist function.
+	tx80211_resolvecard() - This is done for you in the Lorcon.__init__
+		function.
+	tx80211_init() - This is also done for you in the Lorcon.__init__ function.
+	tx80211_open() - Also in Lorcon.__init__
+	tx80211_initpacket() - You guessed it, also in Lorcon.__init__
+	tx80211_close() - Called automatically when the Lorcon object is destroyed.
+
+	Also, for functions that, in LORCON, used a macro such as TX80211_CAP_SNIFF
+	or something like that, I shortened it up to just "SNIFF".  So for all of
+	those macros, I just cut off the TX80211_XXXX_ from the macro name.
+
+	One other thing, for functions that only work if a card has certain
+	capabilites, it gets checked automatically before trying to change the
+	setting, if it fails the check, it raises a LorconError.
+
+	LorconError is the exception class I use for all my errors.
+
+IV.) USAGE
+
+	1.) int getversion()
+		Args: None
+		Returns: Integer representing the currently installed
+		LORCON version.  Format: YEAR(4 digits), MONTH(2 digits), RELEASE (2
+		digits).
+
+	2.) getcardlist()
+		Args: None
+		Returns: - List containing dictionaries containing information about
+		supported cards.  Dictionary has keys: 
+			'name' - name of the driver
+			'capabilities' - list of capability info
+			'description' - description of the driver
+	
+	3.) Lorcon(iface, driver)
+		Args: string iface - wireless interface to use
+			string driver - LORCON driver to use
+		Returns: Lorcon object instance
+
+	4.) Lorcon.getiface()
+		Args: None
+		Returns: String with the wireless interface used to create the instance
+
+	5.) Lorcon.getdriver()
+		Args: None
+		Returns: String with the LORCON driver used to create the instance.
+
+	6.) Lorcon.getmode()
+		Args: None
+		Returns: String representing the current mode.  Possible values:
+			'AUTO' - driver decides the best operating mode
+			'ADHOC' - operate as an IBSS or ad-hoc network.
+			'INFRA' - operate as a wireless client in a BSS or ESS network
+			'MASTER' - operates as an access point of master device
+			'REPEAT' - operates as a wireless repeater or forwarder
+			'SECOND' - operates as a backup or secondary access point
+			'MONITOR' - forwards all frames to userspace
+
+	7.) Lorcon.setmode(mode)
+		Args: String representing the mode to be set (same strings as the
+			return values of Lorcon.getmode()
+		Returns: None
+	
+	8.) Lorcon.setfunctionalmode(funcmode)
+		Args: String representing the functional mode to be set. Possible
+			values:
+			'RFMON' - Forward all frames to userspace
+			'INJECT' - Configures the card for injection mode
+			'INJMON' - Combines 'RFMON' and 'INJECT'
+		Returns: None
+
+	9.) Lorcon.getchannel()
+		Args: None
+		Returns: Integer representing the current channel
+
+	10.) Lorcon.setchannel(channel)
+		Args: Integer representing the channel to change to
+		Returns: None
+
+	11.) Lorcon.gettxrate()
+		Args: None
+		Returns: Integer representing the currently set transfer rate in Mbps
+
+	12.) Lorcon.settxrate(rate)
+		Args: Integer for rate to set.  Possible values: 1,2,5.5,6,9,11,22,24,
+			36,48,72,96,108
+		Returns: None
+
+	13.) Lorcon.getmodulation()
+		Args: None
+		Returns: String representing the current modulation scheme.  Possible
+			values:
+			'DEFAULT' - Default modulation for the current channel
+			'FHSS' - Frequency Hopping Spread Spectrum, no drivers currently
+				support this
+			'DSSS' - Distributed Sequence Spread Spectrum, mostly 802.11b
+			'OFDM' - Orthogonal Frequency Division Multiplexing, mostly 802.11a-g
+			'TURBO' - Atheros proprietary Turbo mode
+			'MIMO' - Multiple Input Multiple Output mechanism
+			'MIMOGF' - MIMO Greenfield mode, 802.11n
+
+	14.) Lorcon.setmodulation(modulation)
+		Args: String representing modulation mode (same as return values for
+			getmodulation)
+		Returns: None
+
+	15.) Lorcon.getcapabilities()
+		Args: None
+		Returns: a list of capability information on the currently used driver.
+			Possible values:
+				'NONE','SNIFF','TRANSMIT','SEQ','BSSTIME','FRAG','CTRL','DURID',
+				'SNIFFACK','SELFACK','TXNOWAIT','DSSSTX','OFDMTX','MIMOTX',
+				'SETRATE','SETMODULATION'.
+
+	16.) Lorcon.txpacket(pkt)
+		Args: String representing the packet to send
+		Returns: None
